@@ -1,6 +1,7 @@
 FROM local/acquia-base
 MAINTAINER Nicholas Alipaz <nicholas.alipaz@heremedia.com>
 
+COPY container /
 USER root
 
 ENV PERCONA_MAJOR_VERSION 5.5
