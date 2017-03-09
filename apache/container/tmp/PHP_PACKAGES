@@ -1,0 +1,17 @@
+autoconf
+libbsd0
+libedit2
+libxml2
+libmagic1
+ucf
+sgml-base
+xml-core
+libc-client2007e
+libxslt1.1
+libudev0:i386
+libdb4.8
+libfreetype6
+unixodbc
+libreadline6
+libssh2-1
+libgpgme11

@@ -1,0 +1,12 @@
+gnupg-%s
+igbinary-%s
+imagick-%s
+memcache-%s
+mongo-%s
+OAuth-%s
+propro-%s\
+raphf-%s\
+ssh2-${PHP_EXTENSION_SSH2_VERSION}\
+uploadprogress-${PHP_EXTENSION_UPLOADPROGRESS_VERSION}\
+xdebug-${PHP_EXTENSION_XDEBUG_VERSION}\
+xhprof-${PHP_EXTENSION_XHPROF_VERSION}
