@@ -106,6 +106,26 @@ RUN pecl install ${PECL_STRING} &&\
  apt-get clean &&\
  echo '<?php phpinfo(); ?>' > /var/www/test.php
 
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --version 1.2.1 --install-dir=/usr/local/bin --filename=composer &&\
+ echo "export PATH=~/.composer/vendor/bin:\$PATH" > /etc/profile.d/global-paths.sh
+
+# Install Drupal console
+RUN composer global require drupal/console-en:1.0.0-rc16 drupal/console:1.0.0-rc16 drupal/console-core:1.0.0-rc16
+RUN echo "source \"$HOME/.console/console.rc\" 2>/dev/null" > /etc/profile.d/drupal-console.sh
+#RUN curl -fsSL -o /usr/local/bin/drupal "https://drupalconsole.com/installer" &&\
+# chmod +x /usr/local/bin/drupal
+
+# Install drush
+RUN apt-get install --no-install-recommends -y mysql-client openssh-client rsync &&\
+ apt-get clean
+RUN composer global require webflo/drush-shim
+#USER 1000
+#RUN curl -fsSL -o /usr/local/bin/drush "https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar" &&\
+# chmod +x /usr/local/bin/drush &&\
+# drush core-status -y &&\
+# drush init -y
+
 EXPOSE 80 443
 WORKDIR /var/www/html
 
