@@ -1,4 +1,4 @@
-FROM local/acquia-base
+FROM heremedia/acquia-base
 #FROM heremedia/acquia-base
 MAINTAINER Nicholas Alipaz <nicholas.alipaz@heremedia.com>
 
