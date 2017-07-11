@@ -109,31 +109,36 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 			mysql+=( -p"${MYSQL_ROOT_PASSWORD}" )
 		fi
 
-		if [ "$MYSQL_DATABASE" ]; then
-			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" | "${mysql[@]}"
-			mysql+=( "$MYSQL_DATABASE" )
-		fi
-
 		if [ "$MYSQL_USER" -a "$MYSQL_PASSWORD" ]; then
 			echo "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;" | "${mysql[@]}"
-
-			if [ "$MYSQL_DATABASE" ]; then
-				echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;" | "${mysql[@]}"
-			fi
-
-			echo 'FLUSH PRIVILEGES ;' | "${mysql[@]}"
 		fi
 
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
+			# Assume a file name format for our sql, as exported by acquia backup page download:
+			# prod-advocate_com-heremediadb59579-2017-07-09.sql.gz
+			# Then create a database for each of the files and grant access to our user.
+			MYSQL_DATABASE=$(echo ${f}|sed 's/\/[^\/]+\/[a-z]+-([a-z_0-9]+)-[^-]+-[0-9]{4}-[0-9]{2}-[0-9]{2}\.sql/\1/')
+			if [ "$MYSQL_DATABASE" ]; then
+				echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" | "${mysql[@]}"
+				mysql+=( "$MYSQL_DATABASE" )
+			fi
+
+			if [ "$MYSQL_USER" -a "$MYSQL_PASSWORD" ]; then
+				if [ "$MYSQL_DATABASE" ]; then
+					echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;" | "${mysql[@]}"
+				fi
+			fi
+
 			case "$f" in
-				*.sh)     echo "$0: running $f"; . "$f" ;;
-				*.sql)    echo "$0: running $f"; "${mysql[@]}" < "$f"; echo ;;
-				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${mysql[@]}"; echo ;;
+				*.sql)    echo "$0: running $f"; "${mysql[@]} ${MYSQL_DATABASE}" < "$f"; echo ;;
+				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${mysql[@]} ${MYSQL_DATABASE}"; echo ;;
 				*)        echo "$0: ignoring $f" ;;
 			esac
 			echo
 		done
+
+		echo 'FLUSH PRIVILEGES ;' | "${mysql[@]}"
 
 		if ! kill -s TERM "$pid" || ! wait "$pid"; then
 			echo >&2 'MySQL init process failed.'
